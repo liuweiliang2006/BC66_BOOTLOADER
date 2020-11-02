@@ -421,14 +421,14 @@ int M26_http_read(int start, int size, char** data)
 			memcpy(BC66_Data_Buffer,ptFindPos,size);
 			*data = BC66_Data_Buffer; //将数据地址返回给二级指针
 		}
-		for(i=0;i<size;i++)
-		{
-			printf("%02X ",*(*data+i));
-//			if(i%16 == 0)
-//			{
-//				printf("\r\n");
-//			}
-		}
+//		for(i=0;i<size;i++)
+//		{
+//			printf("%02X ",*(*data+i));
+////			if(i%16 == 0)
+////			{
+////				printf("\r\n");
+////			}
+//		}
     return size;
 }
 

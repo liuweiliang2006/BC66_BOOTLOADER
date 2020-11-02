@@ -170,7 +170,7 @@ int main(void)
 		char *address = "39.101.176.192:8080/bin/test2.bin";
 ////								char *md5="b0 34 48 75 18 ca 8a f5 0f 67 1e 40 4b c2 9c 13";
 		char *md5=ver;	
-	
+		updata.FILESIZE = 69876;
 //		sim900a_gpio_init();
     sys_init(); 
 	

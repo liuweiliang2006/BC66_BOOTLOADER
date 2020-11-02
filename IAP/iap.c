@@ -117,7 +117,7 @@ void MD5Print(char* md5_str)
     int i = 0;
     printf("\r\nMD5:");
     for(i=0;i<16;i++) {
-        printf("%02x", md5_str[i]);
+        printf("%02x ", md5_str[i]);
     }
 }
 
@@ -184,8 +184,8 @@ int check_firmware_in_sflash(const char* md5)
 
     MD5_CTX md5_ctx;
     MD5Init(&md5_ctx);
-		updata.FILESIZE = 69876;
-		flie_size = 69876;
+//		updata.FILESIZE = 69876;
+//		flie_size = 69876;
 
 		printf("\r\n UPDATAFLAG:0x%X \r\n", updata.BOOTFLAG);
 		printf("\r\n FILESIZE:%d \r\n", updata.FILESIZE);
@@ -242,6 +242,7 @@ int check_firmware_in_sflash(const char* md5)
 
     MD5Final(&md5_ctx, (unsigned char*)temp_md5);
     MD5Print(temp_md5);
+		puts("\r\n");
 
     if(strncmp(temp_md5, md5, 16) == 0) {
         printf("STM32FLASH md5 check ok, write to flash now!!!\n");
@@ -263,7 +264,7 @@ int write_firmware_from_sim900a(uint32_t dst)
 	char* data = NULL;
   int read_len = -1;
 	
-	u32ReadLength = 69876;
+//	u32ReadLength = 69876;
 	u16ReadTimes = (int)u32ReadLength/FIRMWARE_BLOCK;
 	
 	if(u32ReadLength%FIRMWARE_BLOCK !=0)
