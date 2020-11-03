@@ -161,7 +161,7 @@ int main(void)
 {
 		uint32_t whiletime_out = 10;
 	  char jumpAPP = 0,copy_err = 0;
-	
+		ErrorStatus AnalysyResult;
 		uint8_t i;
 	  int8_t UPDATAFLAG = 0;
 		uint8_t result = NOTFOUND;
@@ -174,66 +174,49 @@ int main(void)
 //		sim900a_gpio_init();
     sys_init(); 
 	
-		updata.BOOTFLAG = 0xAA;//置固件更新失败,重新联网下载
+		updata.BOOTFLAG = 0xAA;
 		MB85RS16A_WRITE(BOOTFLAG_ADDR,(uint8_t*)&updata,sizeof(updata_t));  
 	
 	  read_sflash();
-//		while(1)
-//		{
-//			
-//		}
-	  gassembleStatus = motor_null;
-	
-	  if(strcmp(REAL_DATA_PARAM.TankLockStatus, "0")==0)
-		{
-				strcpy(REAL_DATA_PARAM.TankLockStatus,"1");
-				gassembleStatus = motor_close;
-			  printf("1\r\n");
-			  REAL_DATA_PARAM_Write();
-			
-			  ENBOOST_PWR(1); //6.5伏电压,给传感器,电磁阀供电 1.1mA
-				
-				assemble_test();
-				
-				//ENBOOST_PWR(0); //6.5伏电压,给传感器,电磁阀供电 1.1mA
-		}
-//		
-//		delay_ms(1000);
-//			iap_load_app(FLASH_APP1_ADDR);
-		
-		gassembleStatus = motor_null;
-		keyValue = GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0);
-		//printf("keyValue:%d\r\n",keyValue);
-	  if(keyValue == 0)
-		{
-			if(strcmp(REAL_DATA_PARAM.TankLockStatus, "1")==0)
-      {
-				strcpy(REAL_DATA_PARAM.TankLockStatus,"0");
-				gassembleStatus = motor_open;
-				REAL_DATA_PARAM_Write();
-				printf("2\r\n");
-				ENBOOST_PWR(1); //6.5伏电压,给传感器,电磁阀供电 1.1mA
-				delay_ms(3000);
-				assemble_test();
-				
-				ENBOOST_PWR(0); //6.5伏电压,给传感器,电磁阀供电 1.1mA
-			}
-//			else
-//			{
-//			  strcpy(REAL_DATA_PARAM.TankLockStatus,"1");
-//				gassembleStatus = motor_close;
-//				REAL_DATA_PARAM_Write();
-//				printf("2\r\n");
-//				ENBOOST_PWR(1); //6.5伏电压,给传感器,电磁阀供电 1.1mA
-//				
-//				assemble_test();
-//				
-//				ENBOOST_PWR(0); //6.5伏电压,给传感器,电磁阀供电 1.1mA
-//			}
-		}
 	  
+	
+	  
+	  //updata.BOOTFLAG 使用无线模组进行更新软件
+		/*******************BC66无线模组升级BEGIN***********************/
 		if(updata.BOOTFLAG == 0xAA)
     {
+			gassembleStatus = motor_null;
+			if(strcmp(REAL_DATA_PARAM.TankLockStatus, "0")==0)
+			{
+					strcpy(REAL_DATA_PARAM.TankLockStatus,"1");
+					gassembleStatus = motor_close;
+					printf("1\r\n");
+					REAL_DATA_PARAM_Write();
+				
+					ENBOOST_PWR(1); //6.5伏电压,给传感器,电磁阀供电 1.1mA				
+					assemble_test();
+					
+					//ENBOOST_PWR(0); //6.5伏电压,给传感器,电磁阀供电 1.1mA
+			}
+			
+			gassembleStatus = motor_null;
+			keyValue = GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0);
+			if(keyValue == 0)
+			{
+				if(strcmp(REAL_DATA_PARAM.TankLockStatus, "1")==0)
+				{
+					strcpy(REAL_DATA_PARAM.TankLockStatus,"0");
+					gassembleStatus = motor_open;
+					REAL_DATA_PARAM_Write();
+					printf("2\r\n");
+					ENBOOST_PWR(1); //6.5伏电压,给传感器,电磁阀供电 1.1mA
+					delay_ms(3000);
+					assemble_test();
+					
+					ENBOOST_PWR(0); //6.5伏电压,给传感器,电磁阀供电 1.1mA
+				}
+			}			
+			
 			sim900a_vcc_init();
 		  sim900a_gpio_init();
 			sim900a_poweron();  //唤醒
@@ -252,7 +235,21 @@ int main(void)
 				if(whiletime_out == 0)break;
 			}while(!result);
 			
-				
+			AnalysyResult = ERROR;
+			result = NOTFOUND;
+			whiletime_out = 10;
+			do{
+				result = sim900a_cmd_with_reply("AT+IPR=115200", "OK", NULL, GSM_CMD_WAIT_SHORT); //设置通信波特率
+				if(result == FOUND)
+				{
+					//命令解析函数
+				}
+				delay_ms(500);
+				whiletime_out--;
+				if(whiletime_out == 0)break;
+			}while(!result);	
+			
+			AnalysyResult = ERROR;	
 			result = NOTFOUND;
 			whiletime_out = 10;
 			do{
@@ -267,6 +264,7 @@ int main(void)
 				if(whiletime_out == 0)break;
 			}while(!result);
 
+			AnalysyResult = ERROR;
 			result = NOTFOUND;
 			whiletime_out = 10;
 			do{
@@ -274,16 +272,23 @@ int main(void)
 				//Strong: RSRP ≥ -100 dbm, and RSRQ ≥ -7 dB;
 				//Median: -100 dbm ≥ RSRP ≥ -110 dbm, and RSRQ ≥ -11 dB 
 				//Weak: RSRP < -115 dbm, or RSRQ < -11 dBb
-				result = sim900a_cmd_with_reply("AT+CESQ", "+CESQ", NULL, GSM_CMD_WAIT_SHORT); 
+//				result = sim900a_cmd_with_reply("AT+CESQ", "+CESQ", NULL, GSM_CMD_WAIT_SHORT); 
+				result = sim900a_cmd_with_reply("AT+CSQ", "+CSQ", NULL, GSM_CMD_WAIT_SHORT); 
 				if(result == FOUND)
 				{
-					//命令解析函数 分析信号强弱					
+					//命令解析函数 分析信号强弱			
+					AnalysyResult =Analysis_CSQ_Cmd(NULL);	
+					if(AnalysyResult == ERROR)
+					{
+						result = NOTFOUND;
+					}
 				}
 				delay_ms(300);
 				whiletime_out--;
 				if(whiletime_out == 0)break;
 			}while(!result);
 			
+			AnalysyResult = ERROR;
 			result = NOTFOUND;
 			whiletime_out = 10;
 			do{
@@ -297,19 +302,7 @@ int main(void)
 				if(whiletime_out == 0)break;
 			}while(!result);
 			
-//			result = NOTFOUND;
-//			whiletime_out = 10;
-//			do{
-//				result = sim900a_cmd_with_reply("AT+CEREG=1", "OK", NULL, GSM_CMD_WAIT_SHORT); //附着网络
-//				if(result == FOUND)
-//				{
-//					//命令解析函数 分析信号强弱					
-//				}
-//				delay_ms(300);
-//				whiletime_out--;
-//				if(whiletime_out == 0)break;
-//			}while(!result);			
-			
+			AnalysyResult = ERROR;
 			result = NOTFOUND;
 			whiletime_out = 30;
 			do{
@@ -322,11 +315,12 @@ int main(void)
 				{
 					//命令解析函数 分析信号强弱					
 				}
-				delay_ms(300);
+				delay_ms(800);
 				whiletime_out--;
 				if(whiletime_out == 0)break;
 			}while(!result);				
 
+			AnalysyResult = ERROR;
 			result = NOTFOUND;
 			whiletime_out = 10;
 			do{
@@ -335,23 +329,43 @@ int main(void)
 				{
 					//命令解析函数 分析信号强弱					
 				}
-				delay_ms(300);
+				delay_ms(800);
 				whiletime_out--;
 				if(whiletime_out == 0)break;
 			}while(!result);
 
+			AnalysyResult = ERROR;
 			result = NOTFOUND;
 			whiletime_out = 10;
 			do{
 				result = sim900a_cmd_with_reply("AT+CGATT?", "+CGATT", NULL, GSM_CMD_WAIT_SHORT); //是否附着网络
 				if(result == FOUND)
 				{
-					//命令解析函数 分析信号强弱					
+					//命令解析函数 分析信号强弱	
+					AnalysyResult=Analysis_CGATT_Cmd(NULL);
+					if(AnalysyResult == ERROR)
+					{
+						result = NOTFOUND;
+					}
 				}
 				delay_ms(300);
 				whiletime_out--;
 				if(whiletime_out == 0)break;
 			}while(!result);			
+
+			AnalysyResult = ERROR;
+			result = NOTFOUND;
+			whiletime_out = 10;
+			do{
+				result = sim900a_cmd_with_reply("AT+CGPADDR", "OK", NULL, GSM_CMD_WAIT_SHORT); //查询IP地址
+				if(result == FOUND)
+				{
+					//命令解析函数 分析信号强弱	
+				}
+				delay_ms(300);
+				whiletime_out--;
+				if(whiletime_out == 0)break;
+			}while(!result);
 			
 				if(!(sim900a_cmd_with_reply("AT+CEREG?", "0,5", NULL, GSM_CMD_WAIT_SHORT) || \
 							sim900a_cmd_with_reply("AT+CEREG?", "0,1", NULL, GSM_CMD_WAIT_SHORT)))
@@ -393,11 +407,6 @@ int main(void)
 					
 						while(1)
 						{
-//							for(i=0;i<strlen(address);i++)
-//							{
-//								updata.URL_ADDR[i] = *(address+i);
-//							}
-//								strcpy(updata.URL_ADDR,address);
 								memcpy(updata.URL_ADDR,address,strlen(address));
 								memcpy(updata.MD5CODE,md5,16*sizeof(char));
 								UPDATAFLAG = update_from_sim900a(FLASH_APP1_ADDR, updata.URL_ADDR, updata.MD5CODE);

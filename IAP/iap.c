@@ -337,7 +337,5 @@ int update_from_sim900a(uint32_t dst, char* url, const char* md5)
             return -2;
         }
     }
-//		while(1)
-//		{}
     return 0;
 }
