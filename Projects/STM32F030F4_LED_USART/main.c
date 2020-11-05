@@ -45,6 +45,10 @@
 #include "MB85RS16A.h"
 #include "ATCmdAnalyse.h"
 
+#include "common.h"
+#include "flash_if.h"
+#include "menu.h"
+#include "ymodem.h"
 
 #define SERVER_IPADDR	"47.95.200.195"
 #define SERVER_PORT		"6060"
@@ -166,25 +170,18 @@ int main(void)
 	  int8_t UPDATAFLAG = 0;
 		uint8_t result = NOTFOUND;
 	  uint8_t keyValue = 0;
-		char ver[16]={0xb0,0x34,0x48,0x75,0x18,0xca,0x8a,0xf5,0x0f,0x67,0x1e,0x40,0x4b,0xc2,0x9c,0x13};
-		char *address = "39.101.176.192:8080/bin/test2.bin";
+//		char ver[16]={0xb0,0x34,0x48,0x75,0x18,0xca,0x8a,0xf5,0x0f,0x67,0x1e,0x40,0x4b,0xc2,0x9c,0x13};
+//		char *address = "39.101.176.192:8080/bin/test2.bin";
 ////								char *md5="b0 34 48 75 18 ca 8a f5 0f 67 1e 40 4b c2 9c 13";
-		char *md5=ver;	
-		updata.FILESIZE = 69876;
+//		char *md5=ver;	
+//		updata.FILESIZE = 69876;
 //		sim900a_gpio_init();
     sys_init(); 
 	
-		updata.BOOTFLAG = 0xAA;
-		MB85RS16A_WRITE(BOOTFLAG_ADDR,(uint8_t*)&updata,sizeof(updata_t));  
+//		updata.BOOTFLAG = 0x00;
+//		MB85RS16A_WRITE(BOOTFLAG_ADDR,(uint8_t*)&updata,sizeof(updata_t));  
 	
 	  read_sflash();
-	  
-	
-	  
-	  //updata.BOOTFLAG 使用无线模组进行更新软件
-		/*******************BC66无线模组升级BEGIN***********************/
-		if(updata.BOOTFLAG == 0xAA)
-    {
 			gassembleStatus = motor_null;
 			if(strcmp(REAL_DATA_PARAM.TankLockStatus, "0")==0)
 			{
@@ -215,8 +212,13 @@ int main(void)
 					
 					ENBOOST_PWR(0); //6.5伏电压,给传感器,电磁阀供电 1.1mA
 				}
-			}			
-			
+			} 
+	
+	  
+	  //updata.BOOTFLAG 使用无线模组进行更新软件
+		/*******************BC66无线模组升级BEGIN***********************/
+		if(updata.BOOTFLAG == 0xAA)
+    {			
 			sim900a_vcc_init();
 		  sim900a_gpio_init();
 			sim900a_poweron();  //唤醒
@@ -407,8 +409,8 @@ int main(void)
 					
 						while(1)
 						{
-								memcpy(updata.URL_ADDR,address,strlen(address));
-								memcpy(updata.MD5CODE,md5,16*sizeof(char));
+//								memcpy(updata.URL_ADDR,address,strlen(address));
+//								memcpy(updata.MD5CODE,md5,16*sizeof(char));
 								UPDATAFLAG = update_from_sim900a(FLASH_APP1_ADDR, updata.URL_ADDR, updata.MD5CODE);
 							  //UPDATAFLAG = update_from_sim900a(FLASH_APP1_ADDR, "47.95.200.195:8080/bin/APP1.bin", updata.MD5CODE);
 								if(UPDATAFLAG == 0)
@@ -471,6 +473,21 @@ int main(void)
 						 }
 			    }
 			}
+		/*******************BC66无线模组升级END***********************/
+			
+		/*******************串口3升级BEGIN***********************/
+			else if(updata.BOOTFLAG == 0xBB)
+			{
+				uint32_t Size;
+				printf("USART updata \r\n");
+				FLASH_If_Init();
+				Size=SerialDownload();
+				delay_ms(1000);
+				printf("size %d\r\n",Size);
+				printf("leave bootloader! \r\n");
+				iap_load_app(APPLICATION_ADDRESS);
+			}
+		/*******************串口3升级END***********************/
 		  else if(updata.BOOTFLAG == 0x22) 
 			{
 				    printf("---BOOTLOAD 22 jump 2---\r\n");

@@ -392,7 +392,7 @@ int M26_http_read(int start, int size, char** data)
 		u16FrameOverTime=0;
 		//AT+QFLASHR=0,1024,1
 //    snprintf(read_range, 48, "AT+QFLASHR=%d,%d,1", start, size);
-//		printf("\r\n");
+		printf("updating...\r\n");
 		sprintf(read_range,"AT+QFLASHR=%d,%d,1\r\n",start, size);//从BC66读取指令
     gsm_global_data.frame_len = 0;
 		memset(gsm_global_data.frame_buf,0,GSM_DATA_RECORD_MAX_LEN); //发送指令前，清接收BUFFER

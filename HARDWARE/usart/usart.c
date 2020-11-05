@@ -41,7 +41,7 @@ GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
 	USART_Init(USART3, &USART_InitStructure);		
-	USART_ITConfig(USART3,USART_IT_RXNE,ENABLE);         
+//	USART_ITConfig(USART3,USART_IT_RXNE,ENABLE);         
 	USART_Cmd(USART3, ENABLE);                            
 	
 	

@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F030xC,</Define>
               <Undefine></Undefine>
-              <IncludePath>.\..\;..\..\..\Libraries\CMSIS\Device\ST\STM32F0xx\Include;.\..\..\..\Libraries\CMSIS\Include;.\..\..\..\Libraries\STM32F0xx_StdPeriph_Driver\inc;.\..\..\..\Utilities\STM32F0308-Discovery;..\..\..\SYSTEM\sys;..\..\..\HARDWARE\spiflash;..\..\..\HARDWARE\LED;..\..\..\BSP;..\..\..\HARDWARE\beep;..\..\..\HARDWARE\delay;..\..\..\HARDWARE\md5;..\..\..\HARDWARE\sim900a;..\..\..\HARDWARE\STMFLASH;..\..\..\HARDWARE\fram;..\..\..\HARDWARE\usart;..\..\..\IAP;..\..\..\HARDWARE\moto</IncludePath>
+              <IncludePath>.\..\;..\..\..\Libraries\CMSIS\Device\ST\STM32F0xx\Include;.\..\..\..\Libraries\CMSIS\Include;.\..\..\..\Libraries\STM32F0xx_StdPeriph_Driver\inc;.\..\..\..\Utilities\STM32F0308-Discovery;..\..\..\SYSTEM\sys;..\..\..\HARDWARE\spiflash;..\..\..\HARDWARE\LED;..\..\..\BSP;..\..\..\HARDWARE\beep;..\..\..\HARDWARE\delay;..\..\..\HARDWARE\md5;..\..\..\HARDWARE\sim900a;..\..\..\HARDWARE\STMFLASH;..\..\..\HARDWARE\fram;..\..\..\HARDWARE\usart;..\..\..\IAP;..\..\..\HARDWARE\moto;..\..\..\UARTUPDATA</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -601,6 +601,31 @@
               <FileName>iap.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\IAP\iap.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>UARTUPDATA</GroupName>
+          <Files>
+            <File>
+              <FileName>common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\UARTUPDATA\common.c</FilePath>
+            </File>
+            <File>
+              <FileName>flash_if.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\UARTUPDATA\flash_if.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\UARTUPDATA\menu.c</FilePath>
+            </File>
+            <File>
+              <FileName>ymodem.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\UARTUPDATA\ymodem.c</FilePath>
             </File>
           </Files>
         </Group>
