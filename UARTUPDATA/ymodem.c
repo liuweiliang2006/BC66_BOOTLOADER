@@ -14,7 +14,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 extern uint8_t FileName[];
-
+extern uint16_t u16FrameOverTime;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -207,7 +207,8 @@ int32_t Ymodem_Receive (uint8_t *buf)
 
   /* Initialize flashdestination variable */
   flashdestination = APPLICATION_ADDRESS;
-  
+  u16FrameOverTime = 0;
+	TIM_Cmd(TIM6, ENABLE);
   for (session_done = 0, errors = 0, session_begin = 0; ;)
   {
     for (packets_received = 0, file_done = 0, buf_ptr = buf; ;)
@@ -216,6 +217,7 @@ int32_t Ymodem_Receive (uint8_t *buf)
       {
         case 0:
           errors = 0;
+					u16FrameOverTime = 0;
           switch (packet_length)
           {
             /* Abort by sender */
@@ -316,6 +318,10 @@ int32_t Ymodem_Receive (uint8_t *buf)
             return 0;
           }
           Send_Byte(CRC16);
+					if(u16FrameOverTime >120)
+					{
+						return -4;
+					}
           break;
       }
       if (file_done != 0)

@@ -23,7 +23,7 @@ uint8_t tab_1024[1024] =
 uint8_t FileName[FILE_NAME_LENGTH];
 
 /* Private function prototypes -----------------------------------------------*/
-uint32_t SerialDownload(void);
+int SerialDownload(void);
 void SerialUpload(void);
 
 /* Private functions ---------------------------------------------------------*/
@@ -33,14 +33,14 @@ void SerialUpload(void);
   * @param  None
   * @retval None
   */
-uint32_t SerialDownload(void)
+int SerialDownload(void)
 {
   uint8_t Number[10] = {0};
   int32_t Size = 0;
 
 	SerialPutString("SerialDownload entered!\n\r");
 
-  SerialPutString("Waiting for the file to be sent ... (press 'a' to abort)\n\r");
+//  SerialPutString("Waiting for the file to be sent ... (press 'a' to abort)\n\r");
   Size = Ymodem_Receive(&tab_1024[0]);
 	return Size;
 //  if (Size > 0)

@@ -39,7 +39,7 @@ typedef  void (*pFunction)(void);
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void Main_Menu(void);
-uint32_t SerialDownload(void);
+int SerialDownload(void);
 
 #endif  /* __MENU_H */
 

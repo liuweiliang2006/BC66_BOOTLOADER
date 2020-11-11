@@ -178,8 +178,8 @@ int main(void)
 //		sim900a_gpio_init();
     sys_init(); 
 	
-//		updata.BOOTFLAG = 0x00;
-//		MB85RS16A_WRITE(BOOTFLAG_ADDR,(uint8_t*)&updata,sizeof(updata_t));  
+		updata.BOOTFLAG = 0xBB;
+		MB85RS16A_WRITE(BOOTFLAG_ADDR,(uint8_t*)&updata,sizeof(updata_t));  
 	
 	  read_sflash();
 			gassembleStatus = motor_null;
@@ -266,9 +266,39 @@ int main(void)
 				if(whiletime_out == 0)break;
 			}while(!result);
 
-			AnalysyResult = ERROR;
+			AnalysyResult = ERROR;	
 			result = NOTFOUND;
 			whiletime_out = 10;
+			do{
+				result = sim900a_cmd_with_reply("AT+QBAND=4,1,3,5,8", "OK", NULL, GSM_CMD_WAIT_SHORT); //频段
+				if(result == FOUND)
+				{
+					//命令解析函数
+					
+				}
+				delay_ms(300);
+				whiletime_out--;
+				if(whiletime_out == 0)break;
+			}while(!result);			
+
+			AnalysyResult = ERROR;	
+			result = NOTFOUND;
+			whiletime_out = 10;
+			do{
+				result = sim900a_cmd_with_reply("AT+CGSN=1", "+CGSN", NULL, GSM_CMD_WAIT_SHORT); //IMEI码
+				if(result == FOUND)
+				{
+					//命令解析函数
+					
+				}
+				delay_ms(300);
+				whiletime_out--;
+				if(whiletime_out == 0)break;
+			}while(!result);
+			
+			AnalysyResult = ERROR;
+			result = NOTFOUND;
+			whiletime_out = 20;
 			do{
 				//查询信号指令 
 				//Strong: RSRP ≥ -100 dbm, and RSRQ ≥ -7 dB;
@@ -285,7 +315,7 @@ int main(void)
 						result = NOTFOUND;
 					}
 				}
-				delay_ms(300);
+				delay_ms(500);
 				whiletime_out--;
 				if(whiletime_out == 0)break;
 			}while(!result);
@@ -412,6 +442,7 @@ int main(void)
 //								memcpy(updata.URL_ADDR,address,strlen(address));
 //								memcpy(updata.MD5CODE,md5,16*sizeof(char));
 								UPDATAFLAG = update_from_sim900a(FLASH_APP1_ADDR, updata.URL_ADDR, updata.MD5CODE);
+								TIM_Cmd(TIM6, DISABLE);
 							  //UPDATAFLAG = update_from_sim900a(FLASH_APP1_ADDR, "47.95.200.195:8080/bin/APP1.bin", updata.MD5CODE);
 								if(UPDATAFLAG == 0)
 								{
@@ -478,14 +509,49 @@ int main(void)
 		/*******************串口3升级BEGIN***********************/
 			else if(updata.BOOTFLAG == 0xBB)
 			{
-				uint32_t Size;
+				int Size;
 				printf("USART updata \r\n");
 				FLASH_If_Init();
 				Size=SerialDownload();
+				TIM_Cmd(TIM6, DISABLE);
 				delay_ms(1000);
 				printf("size %d\r\n",Size);
 				printf("leave bootloader! \r\n");
-				iap_load_app(APPLICATION_ADDRESS);
+				if (Size > 0)
+				{//升级成功
+					updata.BOOTFLAG = 0x22;//置固件更新成功标志位
+					MB85RS16A_WRITE(BOOTFLAG_ADDR,(uint8_t*)&updata,sizeof(updata_t));
+					printf("Success to write new firmware, jump to app now!\r\n");					
+					iap_load_app(FLASH_APP1_ADDR);
+					printf("jump app1 fail, will jump app2!\r\n");
+					iap_load_app(FLASH_APP2_ADDR);	
+					updata.BOOTFLAG = 0xAA;//置固件更新失败,重新联网下载
+					jumpAPP = 1;
+					MB85RS16A_WRITE(BOOTFLAG_ADDR,(uint8_t*)&updata,sizeof(updata_t));
+					printf("Jump to new firmware failed, reboot now!\r\n");
+
+					iap_load_app(FLASH_BASE);					
+				}
+				else if(Size == -4) //软件操作超时，没有写FLAHS，跳到APP1
+				{
+					printf("\r\nreceive firmware over time,jump app1!\r\n");
+					updata.BOOTFLAG = 0x22;//置固件更新成功标志位
+					MB85RS16A_WRITE(BOOTFLAG_ADDR,(uint8_t*)&updata,sizeof(updata_t));
+					printf("Success to write new firmware, jump to app now!\r\n");					
+					iap_load_app(FLASH_APP1_ADDR);
+				}
+				else
+				{//升级失败
+					#ifdef MAIN_DEBUG
+					printf("---BOOTLOAD FALL---\r\n");
+					#endif 
+					printf("UART updata fail,app1 can not work ,jump app2!\r\n");
+					iap_load_app(FLASH_APP2_ADDR);
+					
+					updata.BOOTFLAG = 0xAA;//置固件更新失败，原固件不可用
+					MB85RS16A_WRITE(BOOTFLAG_ADDR,(uint8_t*)&updata,sizeof(updata_t));			
+					iap_load_app(FLASH_BASE);					
+				}
 			}
 		/*******************串口3升级END***********************/
 		  else if(updata.BOOTFLAG == 0x22) 
