@@ -178,8 +178,8 @@ int main(void)
 //		sim900a_gpio_init();
     sys_init(); 
 	
-		updata.BOOTFLAG = 0xBB;
-		MB85RS16A_WRITE(BOOTFLAG_ADDR,(uint8_t*)&updata,sizeof(updata_t));  
+//		updata.BOOTFLAG = 0x00;
+//		MB85RS16A_WRITE(BOOTFLAG_ADDR,(uint8_t*)&updata,sizeof(updata_t));  
 	
 	  read_sflash();
 			gassembleStatus = motor_null;
@@ -270,7 +270,8 @@ int main(void)
 			result = NOTFOUND;
 			whiletime_out = 10;
 			do{
-				result = sim900a_cmd_with_reply("AT+QBAND=4,1,3,5,8", "OK", NULL, GSM_CMD_WAIT_SHORT); //Æµ¶Î
+//				result = sim900a_cmd_with_reply("AT+QBAND=4,1,3,5,8", "OK", NULL, GSM_CMD_WAIT_SHORT); //Æµ¶Î china
+				result = sim900a_cmd_with_reply("AT+QBAND=1,20", "OK", NULL, GSM_CMD_WAIT_SHORT); //Æµ¶Î kenya
 				if(result == FOUND)
 				{
 					//ÃüÁî½âÎöº¯Êý
